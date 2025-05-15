@@ -2,11 +2,11 @@ import numpy as np
 
 
 class mlp:
-    def __init__(self, input=[0, 1], expected_output=1):
+    def __init__(self, input=[0, 1], expected_output=[1]):
         self.w2 = np.random.randn(2, 2)
         self.w1 = np.random.randn(1, 2)
         self.b2 = np.random.randn(2, 1)
-        self.b1 = np.random.randn()
+        self.b1 = np.random.randn(1, 1)
         self.expected_output = expected_output
         self.input = np.atleast_2d(input).T
         self.forward_state = "initialized"
@@ -43,10 +43,10 @@ class mlp:
         dCdz1 = (self.output - self.expected_output) * (
             (self.output) * (1 - self.output)
         )
-        dCdw1 = dCdz1 * self.a2
+        dCdw1 = dCdz1 * self.a2.T
         dCdb1 = dCdz1 * 1
 
-        dCdz2 = dCdz1 * (np.transpose(self.a2) @ (1 - self.a2)) @ self.w1
+        dCdz2 = dCdz1 * (self.w1 @ (self.a2 * (1 - self.a2)))
         dCdw2 = dCdz2 * self.input
         dCdb2 = dCdz2 * 1
 
@@ -55,27 +55,22 @@ class mlp:
         self.w2 = self.w2 - self.learning_rate * dCdw2
         self.b2 = self.b2 - self.learning_rate * dCdb2
 
-        print(f"w2: {self.w2}")
-        print(f"dCdz2: {dCdz2}")
-        print(f"dCdz1: {dCdz1}")
-        print(f"a2: {(1-self.a2).shape}")
-
     def backwardPass(self):
         self.epochs = 0
         loss = self.MSE()
-        print(loss)
-        while self.epochs < 10000:
+        print(f"Initial loss: {loss}")
+        while self.epochs < 15000:
             self.forwardPass()
             self.gradientDescent()
             self.epochs += 1
 
         loss2 = self.MSE()
-        print(loss2)
+        print(f"Final loss: {loss2}")
+        print(f"Expected Output: {self.expected_output}")
+        print(f"Final Output: {self.output}")
 
 
-nn1 = mlp()
-nn1.forwardPass()
-nn1.gradientDescent()
-"""
+input = np.array([1, 1])
+expected = np.array([0])
+nn1 = mlp(input, expected)
 nn1.backwardPass()
-"""
