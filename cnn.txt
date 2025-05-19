@@ -1,0 +1,7 @@
+An image is slid upon by a filter, the filter had nXn weights and 1 bias, the input image can be worked upon by n filters creating n featureunique maps with each working to extract different features from the input image.
+
+so you do the convolution with a kernel, add a bias and then use ReLU for each input patch/receptive field from the image.
+
+Subsampling is done to reduce the resolution fo the feature map which reduces the precision of distinctive features, improving robustness and adaptability to variablility.
+
+subsampling takes a 2 by 2 receptive unit of the feature map, computes it's average (avg. pooling), multiplies it by a trainbale coefficient, adds a bias and uses a sigmoid or non linear function
