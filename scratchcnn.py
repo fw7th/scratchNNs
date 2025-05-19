@@ -11,6 +11,12 @@ class CNN:
         self.filter4 = np.random.randn(3, 3)
         self.filter5 = np.random.randn(3, 3)
         self.filter6 = np.random.randn(3, 3)
+        self.bias1 = np.random.uniform(0.1, 2)
+        self.bias2 = np.random.uniform(0.1, 2)
+        self.bias3 = np.random.uniform(0.1, 2)
+        self.bias4 = np.random.uniform(0.1, 2)
+        self.bias5 = np.random.uniform(0.1, 2)
+        self.bias6 = np.random.uniform(0.1, 2)
         self.stride = 1
         self.padding = 0
 
@@ -46,60 +52,87 @@ class CNN:
         self.image = Image.open("/home/fw7th/randomCode/3.jpg")
         image = np.array(self.image)
         image = np.array(image) / 255.0
-        f_map1 = self.convolve2d(image, self.filter1)
-        f_map2 = self.convolve2d(image, self.filter2)
-        f_map3 = self.convolve2d(image, self.filter3)
-        f_map4 = self.convolve2d(image, self.filter4)
-        f_map5 = self.convolve2d(image, self.filter5)
-        f_map6 = self.convolve2d(image, self.filter6)
+        f_map1 = self.relu(self.convolve2d(image, self.filter1, self.bias1))
+        f_map2 = self.relu(self.convolve2d(image, self.filter2, self.bias2))
+        f_map3 = self.relu(self.convolve2d(image, self.filter3, self.bias3))
+        f_map4 = self.relu(self.convolve2d(image, self.filter4, self.bias4))
+        f_map5 = self.relu(self.convolve2d(image, self.filter5, self.bias5))
+        f_map6 = self.relu(self.convolve2d(image, self.filter6, self.bias6))
 
         return f_map1, f_map2, f_map3, f_map4, f_map5, f_map6
 
+    def poolLayer1(self):
+        f1, f2, f3, f4, f5, f6 = self.convLayer1()
+        f1_pool = self.maxPool(f1)
+        f2_pool = self.maxPool(f2)
+        f3_pool = self.maxPool(f3)
+        f4_pool = self.maxPool(f4)
+        f5_pool = self.maxPool(f5)
+        f6_pool = self.maxPool(f6)
+
+        return f1_pool, f2_pool, f3_pool, f4_pool, f5_pool, f6_pool
+
     def convlayer2(self):
-        # f_map1, f_map2, f_map3, f_map4, f_map5, f_map6 = self.convLayer1()
+        f_map1, f_map2, f_map3, f_map4, f_map5, f_map6 = self.poolLayer1()
         pass
 
-    def convolve2d(self, matrix, kernel):
-        matrix_height = matrix.shape[0]
-        matrix_width = matrix.shape[1]
-        kernel_height = kernel.shape[0]
-        kernel_width = kernel.shape[1]
+    def convolve2d(self, matrix, kernel, bias):
+        mat_h, mat_w = matrix.shape
+        ker_h, ker_w = kernel.shape
 
-        # General formula to calculate the output size
-        output_height = (
-            matrix_height - kernel_height + 2 * self.padding
-        ) // self.stride + 1
-        output_width = (
-            matrix_width - kernel_width + 2 * self.padding
-        ) // self.stride + 1
+        output_height = ((mat_h - ker_h + 2 * self.padding) // self.stride) + 1
+        output_width = ((mat_w - ker_w + 2 * self.padding) // self.stride) + 1
 
-        padded_matrix = np.pad(matrix, self.padding, mode="constant")
-        output_matrix = np.zeros((output_height, output_width))
+        pad_mat = np.pad(matrix, self.padding, mode="constant")
+        output_mat = np.zeros((output_height, output_width))
 
-        for i in range(
-            0, matrix_height - kernel_height + 2 * self.padding + 1, self.stride
-        ):
-            for j in range(
-                0, matrix_width - kernel_width + 2 * self.padding + 1, self.stride
-            ):
-                output_matrix[i // self.stride, j // self.stride] = np.sum(
-                    padded_matrix[i : i + kernel_height, j : j + kernel_width] * kernel
+        for i in range(0, output_height, self.stride):
+            for j in range(0, output_width, self.stride):
+                sum = np.sum(pad_mat[i : i + ker_h, j : j + ker_w] * kernel)
+                output_mat[i // self.stride, j // self.stride] = sum + bias
+
+        return output_mat
+
+    def maxPool(self, feature_map):
+        f_h, f_w = feature_map.shape
+        ker_h, ker_w = 2, 2
+
+        pool_height = ((f_h - ker_h + 2 * self.padding) // self.stride) + 1
+        pool_width = ((f_w - ker_w + 2 * self.padding) // self.stride) + 1
+
+        pool = np.zeros((pool_height, pool_width))
+
+        for i in range(0, pool_height, self.stride):
+            for j in range(0, pool_width, self.stride):
+                pool[i, j] = np.max(
+                    feature_map[i : i + pool_height, j : j + pool_width]
                 )
 
-        return output_matrix
-
-    def avgPooling(self, feature_map):
-        f_height, f_width = feature_map.shape
-        # vec_space =
+        return pool
 
 
 # Example Usage
-matrix = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])
+matrix = np.array(
+    [
+        [1, 2, 3, 4, 5],
+        [5, 5, 6, 7, 8],
+        [4, 9, 10, 11, 12],
+        [2, 6, 3, 4, 5],
+        [5, 6, 5, 3, 2],
+    ]
+)
 kernel = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
 
 cnn = CNN()
-
+"""
 f1, f2, f3, f4, f5, f6 = cnn.convLayer1()
 print(f1.shape)
+"""
+cow = cnn.convolve2d(matrix, kernel, 0.234)
+p = cnn.maxPool(cow)
+print(cow.shape)
+print(p.shape)
 
-cnn.avgPooling(f1)
+print(f"{cow}\n \n {p} \n \n")
+cran = cnn.convLayer1()
+print(cran)
