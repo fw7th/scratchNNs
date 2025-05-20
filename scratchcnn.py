@@ -115,7 +115,7 @@ class CNN:
 
         return pool
 
-    def convolve3d(self, f_map):
+    def convolve3d(self, f_map, bias):
         self.f_depth, f_height, f_width = f_map.shape
         ker_depth, ker_height, ker_width = self.kernel3d.shape
 
@@ -154,7 +154,7 @@ class CNN:
                         )
                     )
 
-                    output_matrix[i, j] = total_value + self.bias3d
+                    output_matrix[i, j] = total_value + bias
 
         return output_matrix
 
