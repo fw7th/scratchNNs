@@ -70,10 +70,13 @@ class CNN:
         f5_pool = self.maxPool(f5)
         f6_pool = self.maxPool(f6)
 
-        return f1_pool, f2_pool, f3_pool, f4_pool, f5_pool, f6_pool
+        f_stack1 = np.stack(
+            (f1_pool, f2_pool, f3_pool, f4_pool, f5_pool, f6_pool), axis=0
+        )
+        return f_stack1
 
     def convlayer2(self):
-        f_map1, f_map2, f_map3, f_map4, f_map5, f_map6 = self.poolLayer1()
+        f_stack1 = self.poolLayer1()
         pass
 
     def convolve2d(self, matrix, kernel, bias):
@@ -88,7 +91,7 @@ class CNN:
 
         for i in range(0, output_height, self.stride):
             for j in range(0, output_width, self.stride):
-                sum = np.sum(pad_mat[i : i + ker_h, j : j + ker_w] * kernel)
+                sum = np.sum((pad_mat[i : i + ker_h, j : j + ker_w]) * kernel)
                 output_mat[i // self.stride, j // self.stride] = sum + bias
 
         return output_mat
@@ -109,6 +112,19 @@ class CNN:
                 )
 
         return pool
+
+    def convolve3d(self, f_map):
+        f_depth, f_height, f_width = f_map.shape
+        self.kernel3d = np.random.randn(f_depth, 3, 3)
+        ker_depth, ker_height, ker_width = self.kernel3d.shape
+
+        output_height = ((f_height - ker_height + 2 * self.padding) // self.stride) + 1
+        output_width = ((f_width - ker_width + 2 * self.padding) // self.stride) + 1
+
+        output_matrix = np.zeros((output_height, output_width))
+
+        for i in range(0, f_depth, self.
+
 
 
 # Example Usage
