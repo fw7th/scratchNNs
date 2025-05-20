@@ -11,12 +11,14 @@ class CNN:
         self.filter4 = np.random.randn(3, 3)
         self.filter5 = np.random.randn(3, 3)
         self.filter6 = np.random.randn(3, 3)
+        self.kernel3d = np.random.randn(self.f_depth, 3, 3)
         self.bias1 = np.random.uniform(0.1, 2)
         self.bias2 = np.random.uniform(0.1, 2)
         self.bias3 = np.random.uniform(0.1, 2)
         self.bias4 = np.random.uniform(0.1, 2)
         self.bias5 = np.random.uniform(0.1, 2)
         self.bias6 = np.random.uniform(0.1, 2)
+        self.bias3d = np.random.uniform(0.1, 2)
         self.stride = 1
         self.padding = 0
 
@@ -114,8 +116,7 @@ class CNN:
         return pool
 
     def convolve3d(self, f_map):
-        f_depth, f_height, f_width = f_map.shape
-        self.kernel3d = np.random.randn(f_depth, 3, 3)
+        self.f_depth, f_height, f_width = f_map.shape
         ker_depth, ker_height, ker_width = self.kernel3d.shape
 
         output_height = ((f_height - ker_height + 2 * self.padding) // self.stride) + 1
@@ -123,8 +124,39 @@ class CNN:
 
         output_matrix = np.zeros((output_height, output_width))
 
-        for i in range(0, f_depth, self.
+        for i in range(0):
+            for j in range(0, f_height, self.stride):
+                for k in range(0, f_width, self.stride):
+                    total_value = (
+                        np.sum(
+                            f_map[i, j : j + ker_height, k : k + ker_width]
+                            * self.kernel3d[i + 1, :, :]
+                        )
+                        + np.sum(
+                            f_map[i + 1, j : j + ker_height, k : k + ker_width]
+                            * self.kernel3d[i + 1, :, :]
+                        )
+                        + np.sum(
+                            f_map[i + 2, j : j + ker_height, k : k + ker_width]
+                            * self.kernel3d[i + 2, :, :]
+                        )
+                        + np.sum(
+                            f_map[i + 3, j : j + ker_height, k : k + ker_width]
+                            * self.kernel3d[i + 3, :, :]
+                        )
+                        + np.sum(
+                            f_map[i + 4, j : j + ker_height, k : k + ker_width]
+                            * self.kernel3d[i + 4, :, :]
+                        )
+                        + np.sum(
+                            f_map[i + 5, j : j + ker_height, k : k + ker_width]
+                            * self.kernel3d[i + 5, :, :]
+                        )
+                    )
 
+                    output_matrix[i, j] = total_value + self.bias3d
+
+        return output_matrix
 
 
 # Example Usage
